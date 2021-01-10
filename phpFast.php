@@ -6,7 +6,7 @@ class phpFastFile {
             if($this -> exists($path,$as_dir=true) == false) {
                 $this->dir_c($path);
             }
-            f = open($path,'w');
+            $f = open($path,'w');
             fwrite($path,'');
             fclose($path);
             return true;
@@ -129,8 +129,8 @@ class phpFast {
     }
 
     function cookie_set($cookie_name,$expiration=30) {
-        $expiration = time() + (86400 * $expiration),"/");
-        setcookie($cookie_name, 'True', $expiration);
+        $expiration = time() + (86400 * $expiration);
+        setcookie($cookie_name, 'True', $expiration,"/");
     }
 
     function generateRandomString($length=10) {
