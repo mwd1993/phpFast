@@ -46,7 +46,7 @@ if($pf -> $file -> exists($path, $as_dir=false)) {
   $read = $pf -> $file -> file_read($path);
 } else {
   $pf -> $file -> file_create($path);
-  $pf -> $file -> file_write('some text to the file');
+  $pf -> $file -> file_write($path,'some text to the file');
 }
 // Recursively remove a directory
 $pf -> $file -> dir_r($path);
@@ -62,7 +62,7 @@ if($pf -> $file -> exists($path)) {
     echo $attr . ' -> ' . $val;
   }
   // json back to string
-  $pf -> $file -> json_write($path);
+  $pf -> $file -> json_write($path, $json);
 }
 ```
 ### Misc
