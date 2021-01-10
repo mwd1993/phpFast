@@ -1,6 +1,19 @@
 <?php
 class phpFastFile {
 
+    function file_create($path) {
+        if($this -> exists($path) == false) {
+            if($this -> exists($path,$as_dir=true) == false) {
+                $this->dir_c($path);
+            }
+            f = open($path,'w');
+            fwrite($path,'');
+            fclose($path);
+            return true;
+        }
+        return false;
+    }
+
     function file_read($path) {
         return file_get_contents($path);
     }
@@ -12,7 +25,7 @@ class phpFastFile {
         return is_file($path);
     }
 
-    function file_put($path,$contents) {
+    function file_write($path,$contents) {
         return file_put_contents($path,$contents);
     }
 
@@ -55,8 +68,6 @@ class phpFastFile {
 }
 
 class phpFast {
-    public $aMemberVar = 'aMemberVar Member Variable';
-    public $aFuncName = 'aMemberFunc';
     public $file;
     public $logging_enabled = false;
 
@@ -65,7 +76,7 @@ class phpFast {
     }
 
     function log($str) {
-        if($this->$logging_enabled) {
+        if($this -> $logging_enabled) {
             echo $str;
         }
     }
@@ -79,7 +90,7 @@ class phpFast {
         return $_SERVER['REQUEST_METHOD'];
     }
 
-    function has($str,$type=-1) {
+    function has($str, $type=-1) {
         // add support for put requests
 
         if($type == -1) {
@@ -108,6 +119,13 @@ class phpFast {
 
     function cookie_has($cookie_name) {
         return isset($_COOKIE[$cookie_name]);
+    }
+
+    function cookie_get($cookie_name) {
+        if($this->cookie_has($cookie_name)) {
+            return $_COOKIE[$cookie_name];
+        }
+        return false;
     }
 
     function cookie_set($cookie_name,$expiration=(time() + (86400 * 30),"/")) {
