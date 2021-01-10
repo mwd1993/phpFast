@@ -38,7 +38,7 @@ if($pf -> cookie_has('some_cookie')) {
 }
 ```
 
-### files
+### Files
 
 ```php
 if($pf -> $file -> exists($path, $as_dir=false)) {
