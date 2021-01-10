@@ -1,5 +1,5 @@
 # phpFast
-A really light-weight library that allows you to do basic php things a bit quicker.<br>
+A really light-weight php library that allows you to do basic, tedious things, quicker.<br>
 
 
 ### Instantiate the class
