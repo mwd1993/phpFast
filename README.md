@@ -28,7 +28,7 @@ A really light-weight library that allows you to do basic php things a bit quick
 
 ```php
 if($pf -> cookie_has('some_cookie')) {
-  
+   echo 'cookie - > ' . $pf - > cookie_get('some_cookie');
 } else {
   // sets the cookie with default expiration date in 30 days
   $pf -> cookie_set('some_cookie');
