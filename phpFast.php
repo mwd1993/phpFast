@@ -70,6 +70,7 @@ class phpFastFile {
 class phpFast {
     public $file;
     public $logging_enabled = false;
+    public $session_started = false;
 
     function __construct() {
         $this -> file = new phpFastFile();
@@ -141,6 +142,37 @@ class phpFast {
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return $randomString;
+    }
+
+    function session_start(){
+        session_start();
+        $_SESSION['started'] = true;
+    }
+
+    function session_set($key,$val) {
+        if($_SESSION['started']) {
+            $_SESSION[$key] = $val;
+        } else {
+            // session not started..
+        }
+    }
+
+    function session_get($key) {
+        if($_SESSION['started']) {
+            if(isset($_SESSION[$key]) == false) {
+                // no key found
+                return false;
+            }
+            return $_SESSION[$key];
+        }
+    }
+
+    function session_clear($key) {
+        return session_unset($key);
+    }
+
+    function session_end(){
+        return session_unset();
     }
 }
 ?>
