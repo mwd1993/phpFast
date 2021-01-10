@@ -128,7 +128,8 @@ class phpFast {
         return false;
     }
 
-    function cookie_set($cookie_name,$expiration=(time() + (86400 * 30),"/")) {
+    function cookie_set($cookie_name,$expiration=30) {
+        $expiration = time() + (86400 * $expiration),"/");
         setcookie($cookie_name, 'True', $expiration);
     }
 
