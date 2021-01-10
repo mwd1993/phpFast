@@ -32,8 +32,9 @@ if($pf -> cookie_has('some_cookie')) {
 } else {
   // sets the cookie with default expiration date in 30 days
   $pf -> cookie_set('some_cookie');
-  // set 60 day expiration
-  $expiration = time() + (86400 * 60),"/";
+  
+  // set a 60 day expiration instead
+  $expiration = 60;
   $pf -> cookie_set('some_cookie',$expiration);
 }
 ```
