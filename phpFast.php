@@ -5,14 +5,14 @@ class phpFastFile {
 		if($this -> exists($path,$as_dir=true) == false) {
 			$this->dir_c(str_replace($this -> name($path),'',$path));
 		}
-		
-        if($this -> exists($path) == false) {
-            $f = fopen($path,'w');
-            fwrite($f,'');
-            fclose($f);
-            return true;
-        }
-        return false;
+
+		if($this -> exists($path) == false) {
+			$f = fopen($path,'w');
+			fwrite($f,'');
+			fclose($f);
+			return true;
+		}
+	return false;
     }
 
     function name($path) {
@@ -28,9 +28,7 @@ class phpFastFile {
         if (!$i) { return ""; }
         $l = strlen($path) - $i;
         $ext = substr($path,$i,$l);
-
         return $ext;
-
     }
 
     function read($path) {
