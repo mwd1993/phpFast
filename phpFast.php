@@ -1,7 +1,7 @@
 <?php
 class phpFastFile {
 
-    function file_create($path) {
+    function create($path) {
         if($this -> exists($path) == false) {
             if($this -> exists($path,$as_dir=true) == false) {
                 $this->dir_c($path);
@@ -14,7 +14,25 @@ class phpFastFile {
         return false;
     }
 
-    function file_read($path) {
+    function name($path) {
+        return basename($path);
+    }
+
+    function path($path) {
+        return str_replace($this -> name($path),'',$path);
+    }
+
+    function extension($path) {
+        $i = strrpos($path,".");
+        if (!$i) { return ""; }
+        $l = strlen($path) - $i;
+        $ext = substr($path,$i,$l);
+
+        return $ext;
+
+    }
+
+    function read($path) {
         return file_get_contents($path);
     }
 
@@ -25,7 +43,7 @@ class phpFastFile {
         return is_file($path);
     }
 
-    function file_write($path,$contents) {
+    function write($path,$contents) {
         return file_put_contents($path,$contents);
     }
 
@@ -38,7 +56,7 @@ class phpFastFile {
 
     function json_read($path) {
         if($this -> exists($path)) {
-           $data = $this -> file_read($path);
+           $data = $this -> read($path);
            $json = json_decode($data,true);
            return $json;
         }
@@ -67,13 +85,52 @@ class phpFastFile {
     }
 }
 
+class phpFastString {
+
+    function replace($str,$repl,$with) {
+        // lol at this default syntax php thought was ideal
+        return str_replace($repl, $with, $str);
+    }
+
+    function split($str, $by) {
+        // once again..
+        return explode($by,$str);
+    }
+
+    function len($str) {
+        return strlen($str);
+    }
+
+    function slice($str,$start,$end="unset"){
+        if($end == "unset") {
+            $end = $this -> len($str);
+        }
+        return substr($str, $start, $end);
+    }
+
+    function index($str,$sub_str) {
+        return strpos($str, $sub_str);
+    }
+
+    function between($str, $str1, $str2) {
+            $string = ' ' . $str;
+            $ini = $this -> index($string, $str1);
+            if ($ini == 0) return '';
+            $ini += $this -> len($str1);
+            $len = $this -> index($string, $str2, $ini) - $ini;
+            return $this -> slice($string, $ini, $len);
+    }
+}
+
 class phpFast {
     public $file;
+    public $string;
     public $logging_enabled = false;
     public $session_started = false;
 
     function __construct() {
         $this -> file = new phpFastFile();
+        $this -> string = new phpFastString();
     }
 
     function log($str) {
@@ -106,7 +163,6 @@ class phpFast {
 
     function get($str,$type=-1){
         // add support for put requests
-
         if($type == -1) {
             $type = $this->get_request_type();
         }
