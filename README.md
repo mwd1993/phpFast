@@ -10,23 +10,21 @@ A really light-weight php library that allows you to do basic, tedious things, q
 ### isset checking - get/post/put vars
 
 ```php
-  // phpFast instance -> has(arg1, arg2=optional)
-  // arg1: key_value -> server query key (ie: ...php?arg1=1&arg2=2&arg3=...)
-  // arg2: server_request_type -> get, put, post
-  
+  // this equates to: if(isset($_GET/POST/PUT['some_value']))
   if($pf -> has('some_value')) {
     // can output: post, get or put
     echo $pf -> get_request_type();
+    // set the value to a var
     $value_of = $pf -> get('some_value');
   }
   
-  // will get the current request type provided by user
- 
+  // get the current request type provided by user
   if($pf -> has('some_value','post')) {
     // get_request_type() gets the info from the server
     // user defined value may differ from the servers
     echo $pf -> get_request_type();
-    $value_of = $pf -> get('some_value');
+    // user provided value may differ from the servers
+    $value_of = $pf -> get('some_value','post');
   }
  
 ```
@@ -35,13 +33,11 @@ A really light-weight php library that allows you to do basic, tedious things, q
 
 ```php
 // do we have 'some_cookie' cookie set?
-
 if($pf -> cookie_has('some_cookie')) {
    echo 'cookie - > ' . $pf - > cookie_get('some_cookie');
 } else {
   // sets the cookie with default expiration date to 30 days
   $pf -> cookie_set('some_cookie');
-  
   // set a 60 day expiration instead
   $expiration = 60;
   $pf -> cookie_set('some_cookie',$expiration);
@@ -51,10 +47,8 @@ if($pf -> cookie_has('some_cookie')) {
 ### Files
 
 ```php
-// does this file exist?
-// $as_dir = true will check 
-// if a directory exists instead
-
+// check if a file exists
+// $as_dir=true will check if a directory exists instead
 if($pf -> $file -> exists($path, $as_dir=false)) {
   // read the file to a string
   $read = $pf -> $file -> file_read($path);
@@ -75,12 +69,10 @@ $pf -> $file -> dir_r($path);
 if($pf -> $file -> exists($path)) {
   // Read the json file and convert it to a php array
   $json = $pf -> $file -> json_read($path); 
-  
   foreach($json as $attr => $val){
     // echo each attribute of the array and the value associated
     echo $attr . ' -> ' . $val;
   }
-  
   // write the php array back to the file as json
   $pf -> $file -> json_write($path, $json);
 }
