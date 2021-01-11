@@ -21,9 +21,8 @@ A really light-weight php library that allows you to do basic, tedious things, q
   // get the current request type provided by user
   if($pf -> has('some_value','post')) {
     // get_request_type() gets the info from the server
-    // user defined value may differ from the servers
     echo $pf -> get_request_type();
-    // user provided value may differ from the servers
+    // user provided value may differ from the servers above
     $value_of = $pf -> get('some_value','post');
   }
  
