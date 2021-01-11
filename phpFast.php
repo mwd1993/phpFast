@@ -2,13 +2,14 @@
 class phpFastFile {
 
     function create($path) {
+		if($this -> exists($path,$as_dir=true) == false) {
+			$this->dir_c(str_replace($this -> name($path),'',$path));
+		}
+		
         if($this -> exists($path) == false) {
-            if($this -> exists($path,$as_dir=true) == false) {
-                $this->dir_c($path);
-            }
-            $f = open($path,'w');
-            fwrite($path,'');
-            fclose($path);
+            $f = fopen($path,'w');
+            fwrite($f,'');
+            fclose($f);
             return true;
         }
         return false;
@@ -49,7 +50,8 @@ class phpFastFile {
 
     function json_write($path,$json) {
         if($this -> exists($path)) {
-           $json = json_encode($data);
+           $json = json_encode($json);
+		   file_put_contents($path,$json);
            return $json;
         }
     }
@@ -63,7 +65,7 @@ class phpFastFile {
     }
 
     function dir_r($dir){
-        if($this->$file->exists($dir)) {
+        if($this -> exists($dir)) {
             return false;
         }
         if (is_dir($dir)) {
@@ -111,7 +113,9 @@ class phpFastString {
     function index($str,$sub_str) {
         return strpos($str, $sub_str);
     }
-
+	function contains($str, $contains, $case_sensitive=false) {
+		return str_contains(strtolower($str), strtolower($contains));
+	}
     function between($str, $str1, $str2) {
             $string = ' ' . $str;
             $ini = $this -> index($string, $str1);
@@ -148,29 +152,28 @@ class phpFast {
         return $_SERVER['REQUEST_METHOD'];
     }
 
-    function has($str, $type=-1) {
+    function has($key, $type=-1) {
         // add support for put requests
-
         if($type == -1) {
-            $type = $this -> get_request_type();
+            $type = strtolower($this -> get_request_type());
         }
         if($type == "post") {
-            return isset($_POST[$type]);
+            return isset($_POST[$key]);
         } else if($type == "get") {
-            return isset($_POST[$type]);
+            return isset($_GET[$key]);
         }
     }
 
-    function get($str,$type=-1){
+    function get($key,$type=-1){
         // add support for put requests
         if($type == -1) {
-            $type = $this->get_request_type();
+            $type = strtolower($this->get_request_type());
         }
 
         if($type == 'get') {
-            return $_GET[$str];
+            return $_GET[$key];
         } else if($type == 'post') {
-            return $_POST[$str];
+            return $_POST[$key];
         }
     }
 
@@ -231,4 +234,8 @@ class phpFast {
         return session_unset();
     }
 }
+
+$pf = new phpFast();
+
+echo var_dump($pf);
 ?>
