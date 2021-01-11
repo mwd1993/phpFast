@@ -4,6 +4,7 @@ A really light-weight php library that allows you to do basic, tedious things, q
 
 ### Instantiate the class
 ```php
+  include('phpFast.py');
   $pf = new phpFast();
 ```
 
