@@ -12,6 +12,24 @@ class phpFastFile {
         }
         return false;
     }
+    function delete($path) {
+        if ($this->exists($path)) {
+            return unlink($path);
+        }
+        return false;
+    }
+    function copy_to($path, $path_to) {
+        if ($this->exists($path)) {
+            $read = $this->read($path);
+            $this->create($path);
+            $this->write($path_to, $read);
+            return true;
+        }
+        return false;
+    }
+    function rename($path, $rename) {
+        return $this->copy_to($path, $rename);
+    }
     function name($path) {
         return basename($path);
     }
@@ -105,25 +123,76 @@ class phpFastString {
         return $this->slice($string, $ini, $len);
     }
 }
+class phpFastArray {
+    function dump($array) {
+        echo var_dump($array);
+    }
+    function push(&$array, $obj) {
+        return array_push($array, $obj);
+    }
+    function pop(&$array, $index, $extend = 0) {
+        if ($extend == 0) $extend = 1;
+        $arr = array_splice($array, $index, $extend);
+        return $array;
+    }
+}
+class phpFastDate {
+    public $today;
+    public $timezone;
+    private $string;
+    public $name;
+    function __construct() {
+        $this->today = date("m/d/Y");
+        $this->timezone = date_default_timezone_get();
+        $this->name = date('l', strtotime(date("m/d/Y")));
+        $this->string = new phpFastString();
+    }
+    function name() {
+        return date('l', strtotime($this->today));
+    }
+    function today() {
+        return date("m/d/Y");
+    }
+    function time($format = false) {
+        if ($format == false) $format = "h:i:sa";
+        return date($format);
+    }
+    function file_string($reversed = False) {
+        if ($reversed) {
+            $fs = $this->time('h:i:s') . '_' . $this->today;
+        } else {
+            $fs = $this->today . '_' . $this->time('h:i:s');
+        }
+        $fs = $this->string->replace($fs, ':', '');
+        $fs = $this->string->replace($fs, '/', '');
+        return $fs;
+    }
+}
 class phpFast {
     public $file;
     public $string;
+    public $array;
+    public $date;
     public $logging_enabled = false;
     public $session_started = false;
     function __construct() {
         $this->file = new phpFastFile();
         $this->string = new phpFastString();
+        $this->array = new phpFastArray();
+        $this->date = new phpFastDate();
     }
     function log($str) {
         if ($this->$logging_enabled) {
             echo $str;
         }
     }
-    function get_query() {
-        $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        return $url;
+    function request_query($full_query = true) {
+        if ($full_query) {
+            $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            return $url;
+        }
     }
-    function get_request_type() {
+    function request_type() {
         return $_SERVER['REQUEST_METHOD'];
     }
     function has($key, $type = - 1) {
