@@ -18,11 +18,12 @@ class phpFastFile {
         }
         return false;
     }
-    function copy_to($path, $path_to) {
+    function copy_to($path, $path_to, $delete_original = false) {
         if ($this->exists($path)) {
             $read = $this->read($path);
-            $this->create($path);
+            $this->create($path_to);
             $this->write($path_to, $read);
+            if ($delete_original) $this->delete($path);
             return true;
         }
         return false;
