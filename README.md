@@ -14,15 +14,15 @@ A really light-weight php library that allows you to do basic, tedious things, q
   // this equates to: if(isset($_GET/POST/PUT['some_value']))
   if($pf -> has('some_value')) {
     // can output: post, get or put
-    echo $pf -> get_request_type();
+    echo $pf -> request_type();
     // set the value to a var
     $value_of = $pf -> get('some_value');
   }
   
   // get the current request type provided by user
   if($pf -> has('some_value','post')) {
-    // get_request_type() gets the info from the server
-    echo $pf -> get_request_type();
+    // request_type() gets the info from the server
+    echo $pf -> request_type();
     // user provided value may differ from the servers above
     $value_of = $pf -> get('some_value','post');
   }
@@ -47,47 +47,147 @@ if($pf -> cookie_has('some_cookie')) {
 ### Files
 
 ```php
+
+// file class to a variable..
+$file = $pf -> file;
+
 // check if a file exists
 // $as_dir=true will check if a directory exists instead
-if($pf -> $file -> exists($path, $as_dir=false)) {
+if($file -> exists($path, $as_dir=false)) {
   // read the file to a string
-  $read = $pf -> $file -> file_read($path);
+  $read = $file -> read($path);
 } else {
   // create the file
-  $pf -> $file -> file_create($path);
+  $file -> create($path);
   // write some text to the file
-  $pf -> $file -> file_write($path,'some text to the file');
+  $file -> write($path,'some text to the file');
 }
 // Recursively remove a directory
-$pf -> $file -> dir_r($path);
+$file -> dir_r($path);
+
+// Create directory
+$file -> dir_c('some/path/to/dir/');
 ```
 
 ### Json files
 
-```python
+```php
+// file class to a variable..
+$file = $pf -> file;
+
 // does the file exist?
-if($pf -> $file -> exists($path)) {
+if($file -> exists($path)) {
   // Read the json file and convert it to a php array
-  $json = $pf -> $file -> json_read($path); 
+  $json = $file -> json_read($path); 
   foreach($json as $attr => $val){
     // echo each attribute of the array and the value associated
     echo $attr . ' -> ' . $val;
   }
   // write the php array back to the file as json
-  $pf -> $file -> json_write($path, $json);
+  $file -> json_write($path, $json);
 }
 ```
+
+### Strings
+
+```php
+
+$string = $pf -> string;
+
+$my_str = 'i like to eat apples and bananas';
+
+echo $string -> replace($my_str,'apples','mangos');
+// -- > i like to eat mangos and bananas
+
+echo $string -> slice($my_str,2,-2);
+// -- > like to eat mangos and banan
+
+echo $string -> split($my_str,' ');
+// -- > splits $my_str by spaces to an array
+
+echo $string -> index($my_str,'eat');
+// -- > 10
+
+echo $string -> contains($my_str,'bananas');
+// -- > True
+
+echo $string -> between($my_str,'eat','and');
+// -- > apples
+
+echo $string -> len($my_str);
+// --> 32
+
+
+```
+
+### Date
+
+```php
+$date = $pf -> date;
+
+echo $date -> today;
+// -- > 01/11/2021
+
+echo $date -> timezone;
+// -- > Pacific Standard Time
+
+echo $date -> name;
+// -- > Monday
+
+// formatting optional: h:i:sa (hours, minutes, seconds, am or pm)
+echo $date -> time();
+// -- > 03:49:18pm
+
+// generates a str with todaysdate_todaystime
+// optional arg $reversed=False set to true will
+// produce: todaystime_todaysdate
+echo $date -> file_string();
+// -- > 01112021_035031
+
+```
+
+### Arrays
+
+```php
+$array = $pf -> array;
+
+$my_array = array(1, 2, 3, 4);
+
+// simulates echo var_dump($my_array);
+$array -> dump($my_array);
+
+$append = array('append_key1' => '5', 'append_key2' => '10');
+
+// lets remove the front object in our array
+$array -> pop($my_array,0);
+// -- > 2, 3, 4
+
+$array -> push($my_array,$append);
+// -- > 
+// array(4) {
+//   [0] => int(2)
+//   [1] => int(3)
+//   [2] => int(4)
+//   [3] => array(2) {
+//      ["append_key1"]=>
+//      string(1) "5"
+//      ["append_key2"]=>
+//      string(2) "10"
+//    }
+//}
+```
+
 ### Misc
 
-```python
+```php
 
 // gets full string query
-echo $pf -> get_query();
+echo $pf -> request_query();
 // outputs 
 //    https://www.someurl.com/some_php_file.php?arg1=1&arg2=2
 
 // gets the request type
-echo $pf -> get_request_type();
+echo $pf -> request_type();
 // outputs: 
 //    GET/POST/PUT
 
