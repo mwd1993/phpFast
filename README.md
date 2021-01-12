@@ -156,13 +156,19 @@ $my_array = array(1, 2, 3, 4);
 // simulates echo var_dump($my_array);
 $array -> dump($my_array);
 
-$append = array('append_key1' => '5', 'append_key2' => '10');
-
-// lets remove the front object in our array
+// lets remove the first object in our array
 $array -> pop($my_array,0);
 // -- > 2, 3, 4
 
-$array -> push($my_array,$append);
+// create an array of 2 items to add to $my_array
+$append = array('append_key1' => '5', 'append_key2' => '10');
+
+// lets push the append object to $my_var
+$array -> push($my_array, $append);
+
+// dump out the array to be readable
+echo $array -> dump($my_array);
+
 // -- > 
 // array(4) {
 //   [0] => int(2)
