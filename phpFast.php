@@ -199,7 +199,7 @@ class phpFast {
     function has($key, $type = - 1) {
         // add support for put requests
         if ($type == - 1) {
-            $type = strtolower($this->get_request_type());
+            $type = strtolower($this->request_type());
         }
         if ($type == "post") {
             return isset($_POST[$key]);
@@ -210,7 +210,7 @@ class phpFast {
     function get($key, $type = - 1) {
         // add support for put requests
         if ($type == - 1) {
-            $type = strtolower($this->get_request_type());
+            $type = strtolower($this->request_type());
         }
         if ($type == 'get') {
             return $_GET[$key];
