@@ -1,271 +1,770 @@
 <?php
+/**
+ * File Class that handles everything to do with working with files.
+ * @author Marc
+ *
+ */
 class phpFastFile {
-    function create($path) {
-        if ($this->exists($path, $as_dir = true) == false) {
-            $this->dir_c(str_replace($this->name($path), '', $path));
-        }
-        if ($this->exists($path) == false) {
-            $f = fopen($path, 'w');
-            fwrite($f, '');
-            fclose($f);
-            return true;
-        }
-        return false;
-    }
-    function delete($path) {
-        if ($this->exists($path)) {
-            return unlink($path);
-        }
-        return false;
-    }
-    function copy_to($path, $path_to, $delete_original = false) {
-        if ($this->exists($path)) {
-            $read = $this->read($path);
-            $this->create($path_to);
-            $this->write($path_to, $read);
-            if ($delete_original) $this->delete($path);
-            return true;
-        }
-        return false;
-    }
-    function rename($path, $rename) {
-        return $this->copy_to($path, $rename);
-    }
-    function name($path) {
-        return basename($path);
-    }
-    function path($path) {
-        return str_replace($this->name($path), '', $path);
-    }
-    function extension($path) {
-        $i = strrpos($path, ".");
-        if (!$i) {
-            return "";
-        }
-        $l = strlen($path) - $i;
-        $ext = substr($path, $i, $l);
-        return $ext;
-    }
-    function read($path) {
-        return file_get_contents($path);
-    }
-    function exists($path, $as_dir = False) {
-        if ($as_dir) {
-            return file_exists($path);
-        }
-        return is_file($path);
-    }
-    function write($path, $contents) {
-        return file_put_contents($path, $contents);
-    }
-    function json_write($path, $json) {
-        if ($this->exists($path)) {
-            $json = json_encode($json);
-            file_put_contents($path, $json);
-            return $json;
-        }
-    }
-    function json_read($path) {
-        if ($this->exists($path)) {
-            $data = $this->read($path);
-            $json = json_decode($data, true);
-            return $json;
-        }
-    }
-    function dir_r($dir) {
-        if ($this->exists($dir)) {
-            return false;
-        }
-        if (is_dir($dir)) {
-            $objects = scandir($dir);
-            foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    if (is_dir($dir . DIRECTORY_SEPARATOR . $object) && !is_link($dir . "/" . $object)) $this->dir_r($dir . DIRECTORY_SEPARATOR . $object);
-                    else unlink($dir . DIRECTORY_SEPARATOR . $object);
-                }
-            }
-            rmdir($dir);
-        }
-    }
-    function dir_c($dir) {
-        return mkdir($dir);
-    }
+	private $farray;
+	function __construct() {
+		// phpFastArray
+		$this -> farray = new phpFastArray();
+	}
+	/**
+	 * Converts a directory to an array of files, wildcard acceptable.'
+	 *
+	 * @param string $directory
+	 * @param string $wild_card
+	 * @return array
+	 */
+	function dir_to_array($directory, $wild_card = '*') {
+		$dir = new DirectoryIterator( dirname( $directory ) );
+		return iterator_to_array( $dir );
+	}
+	/**
+	 * Attempts to create a file in the specified path.'
+	 *
+	 * @param string $path
+	 * @return boolean
+	 */
+	function create($path) {
+		if ( $this -> exists( $path, $as_dir = true ) == false ) {
+			$this -> dir_c( str_replace( $this -> name( $path ), '', $path ) );
+		}
+		if ( $this -> exists( $path ) == false ) {
+			$f = fopen( $path, 'w' );
+			fwrite( $f, '' );
+			fclose( $f );
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * Attempts to delete a file in the specified path.
+	 *
+	 * @param string $path
+	 * @return boolean
+	 */
+	function delete($path) {
+		if ( $this -> exists( $path ) ) {
+			return unlink( $path );
+		}
+		return false;
+	}
+	/**
+	 * Attempts to copy a file to the specified path, delete_original=True to delete the original file.
+	 *
+	 * @param string $path
+	 * @param string $path_to
+	 * @param boolean $delete_original
+	 * @return boolean
+	 */
+	function copy_to($path, $path_to, $delete_original = false) {
+		if ( $this -> exists( $path ) ) {
+			$read = $this -> read( $path );
+			$this -> create( $path_to );
+			$this -> write( $path_to, $read );
+			if ( $delete_original )
+				$this -> delete( $path );
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * 'Attempts to rename a file specified by path.'
+	 *
+	 * @param string $path
+	 * @param string $rename
+	 * @return boolean
+	 */
+	function rename($path, $rename) {
+		return $this -> copy_to( $path, $rename );
+	}
+	/**
+	 * Attempts to rename a file specified by path
+	 *
+	 * @param string $path
+	 * @return string
+	 */
+	function name($path) {
+		return basename( $path );
+	}
+	/**
+	 * 'Attempts to rename a file specified by path.'
+	 *
+	 * @param string $path
+	 * @return mixed
+	 */
+	function path($path) {
+		return str_replace( $this -> name( $path ), '', $path );
+	}
+	/**
+	 * Gets the extension of a file.
+	 *
+	 * @param string $path
+	 * @return string
+	 */
+	function extension($path) {
+		$i = strrpos( $path, "." );
+		if ( ! $i ) {
+			return "";
+		}
+		$l = strlen( $path ) - $i;
+		$ext = substr( $path, $i, $l );
+		return $ext;
+	}
+	/**
+	 * Reads the file out to a string.
+	 *
+	 * @param string $path
+	 * @return string
+	 */
+	function read($path) {
+		return file_get_contents( $path );
+	}
+	/**
+	 * Checks to see if a file exists, $as_dir=True to check a directory instead.
+	 *
+	 * @param string $path
+	 * @param boolean $as_dir
+	 * @return boolean
+	 */
+	function exists($path, $as_dir = False) {
+		if ( $as_dir ) {
+			return file_exists( $path );
+		}
+		return is_file( $path );
+	}
+	/**
+	 * Writes contents to the file specified.
+	 *
+	 * @param string $path
+	 * @param string $contents
+	 * @return number
+	 */
+	function write($path, $contents) {
+		return file_put_contents( $path, $contents );
+	}
+	/**
+	 * Attempts to write a json object to a file, this method handles encoding.'
+	 *
+	 * @param string $path
+	 * @param array $json
+	 * @return string
+	 */
+	function json_write($path, $json) {
+		if ( $this -> exists( $path ) ) {
+			$json = json_encode( $json );
+			file_put_contents( $path, $json );
+			return $json;
+		}
+	}
+	/**
+	 * Attempts to read a file containing a json, to a php array to loop/work with.
+	 *
+	 * @param string $path
+	 * @return mixed|boolean
+	 */
+	function json_read($path) {
+		if ( $this -> exists( $path ) ) {
+			$data = $this -> read( $path );
+			$json = json_decode( $data, true );
+			return $json;
+		}
+		return false;
+	}
+	/**
+	 * Recursively remove a directory.
+	 *
+	 * @param string $dir
+	 * @return boolean
+	 */
+	function dir_r($dir) {
+		if ( $this -> exists( $dir ) ) {
+			return false;
+		}
+		if ( is_dir( $dir ) ) {
+			$objects = scandir( $dir );
+			foreach ( $objects as $object ) {
+				if ( $object != "." && $object != ".." ) {
+					if ( is_dir( $dir . DIRECTORY_SEPARATOR . $object ) && ! is_link( $dir . "/" . $object ) )
+						$this -> dir_r( $dir . DIRECTORY_SEPARATOR . $object );
+					else
+						unlink( $dir . DIRECTORY_SEPARATOR . $object );
+				}
+			}
+			rmdir( $dir );
+		}
+	}
+	/**
+	 * Create a directory at $dir.
+	 *
+	 * @param string $dir
+	 * @return boolean
+	 */
+	function dir_c($dir) {
+		return mkdir( $dir );
+	}
 }
+/**
+ * File Class that handles everything to do with working with files.
+ *
+ * @author Marc
+ *        
+ */
 class phpFastString {
-    function replace($str, $repl, $with) {
-        // lol at this default syntax php thought was ideal
-        return str_replace($repl, $with, $str);
-    }
-    function split($str, $by) {
-        // once again..
-        return explode($by, $str);
-    }
-    function len($str) {
-        return strlen($str);
-    }
-    function slice($str, $start, $end = "unset") {
-        if ($end == "unset") {
-            $end = $this->len($str);
-        }
-        return substr($str, $start, $end);
-    }
-    function index($str, $sub_str) {
-        return strpos($str, $sub_str);
-    }
-    function contains($str, $contains, $case_sensitive = false) {
-        return str_contains(strtolower($str), strtolower($contains));
-    }
-    function between($str, $str1, $str2) {
-        $string = ' ' . $str;
-        $ini = $this->index($string, $str1);
-        if ($ini == 0) return '';
-        $ini+= $this->len($str1);
-        $len = $this->index($string, $str2, $ini) - $ini;
-        return $this->slice($string, $ini, $len);
-    }
+	/**
+	 * Replaces a word in a string with another word.
+	 *
+	 * @param string $str
+	 * @param string $repl
+	 * @param string $with
+	 * @return mixed
+	 */
+	function replace($str, $repl, $with) {
+		// lol at this default syntax php thought was ideal
+		return str_replace( $repl, $with, $str );
+	}
+	/**
+	 * Splits the string into an array, seperated by $by.
+	 *
+	 * @param string $str
+	 * @param string $by
+	 * @return array
+	 */
+	function split($str, $by) {
+		// once again..
+		return explode( $by, $str );
+	}
+	/**
+	 * Returns the length of the string.
+	 *
+	 * @param string $str
+	 * @return number
+	 */
+	function len($str) {
+		return strlen( $str );
+	}
+	/**
+	 * Slices the string from left to right (optional).
+	 *
+	 * @param string $str
+	 * @param string $start
+	 * @param string $end
+	 * @return string
+	 */
+	function slice($str, $start, $end = "unset") {
+		if ( $end == "unset" ) {
+			$end = $this -> len( $str );
+		}
+		return substr( $str, $start, $end );
+	}
+	/**
+	 * Returns the index of the string found, if any.
+	 *
+	 * @param string $str
+	 * @param string $sub_str
+	 * @return number
+	 */
+	function index($str, $sub_str) {
+		return strpos( $str, $sub_str );
+	}
+	/**
+	 * Check if a string contains a string within it.
+	 *
+	 * @param string $str
+	 * @param string $contains
+	 * @param boolean $case_sensitive
+	 * @return boolean
+	 */
+	function contains($str, $contains, $case_sensitive = false) {
+		return str_contains( strtolower( $str ), strtolower( $contains ) );
+	}
+	/**
+	 * Extracts a string between two strings.
+	 *
+	 * @param string $str
+	 * @param string $str1
+	 * @param string $str2
+	 * @return string
+	 */
+	function between($str, $str1, $str2) {
+		$string = ' ' . $str;
+		$ini = $this -> index( $string, $str1 );
+		if ( $ini == 0 )
+			return '';
+		$ini += $this -> len( $str1 );
+		$len = $this -> index( $string, $str2, $ini ) - $ini;
+		return $this -> slice( $string, $ini, $len );
+	}
 }
+/**
+ * Array Class that handles everything to do with arrays.
+ *
+ * @author Marc
+ *        
+ */
 class phpFastArray {
-    function dump($array) {
-        echo var_dump($array);
-    }
-    function push(&$array, $obj) {
-        return array_push($array, $obj);
-    }
-    function pop(&$array, $index, $extend = 0) {
-        if ($extend == 0) $extend = 1;
-        $arr = array_splice($array, $index, $extend);
-        return $array;
-    }
+	/**
+	 * Dumps the array out to view, echos var_dump.
+	 *
+	 * @param array $array
+	 */
+	function dump($array) {
+		echo var_dump( $array );
+	}
+	/**
+	 * Pushes the object into the array, uses reference to the array.
+	 *
+	 * @param array $array
+	 * @param
+	 *        	$obj
+	 * @return number
+	 */
+	function push(&$array, $obj) {
+		return array_push( $array, $obj );
+	}
+	/**
+	 * Pop an object out of the array, uses reference to the array.
+	 *
+	 * @param array $array
+	 * @param int $index
+	 * @param number $extend
+	 * @return $array
+	 */
+	function pop(&$array, $index, $extend = 0) {
+		if ( $extend == 0 )
+			$extend = 1;
+		$arr = array_splice( $array, $index, $extend );
+		return $array;
+	}
 }
+/**
+ * Date Class that handles everything to do involded with working with dates.
+ *
+ * @author Marc
+ *        
+ */
 class phpFastDate {
-    public $today;
-    public $timezone;
-    private $string;
-    public $name;
-    function __construct() {
-        $this->today = date("m/d/Y");
-        $this->timezone = date_default_timezone_get();
-        $this->name = date('l', strtotime(date("m/d/Y")));
-        $this->string = new phpFastString();
-    }
-    function name() {
-        return date('l', strtotime($this->today));
-    }
-    function today() {
-        return date("m/d/Y");
-    }
-    function time($format = false) {
-        if ($format == false) $format = "h:i:sa";
-        return date($format);
-    }
-    function file_string($reversed = False) {
-        if ($reversed) {
-            $fs = $this->time('h:i:s') . '_' . $this->today;
-        } else {
-            $fs = $this->today . '_' . $this->time('h:i:s');
-        }
-        $fs = $this->string->replace($fs, ':', '');
-        $fs = $this->string->replace($fs, '/', '');
-        return $fs;
-    }
+	public $today;
+	public $timezone;
+	private $string;
+	public $name;
+	function __construct() {
+		$this -> today = date( "m/d/Y" );
+		$this -> timezone = date_default_timezone_get();
+		$this -> name = date( 'l', strtotime( date( "m/d/Y" ) ) );
+		$this -> string = new phpFastString();
+	}
+	/**
+	 * Returns the name of the day, ie: monday, tuesday, etc.
+	 *
+	 * @return string
+	 */
+	function name() {
+		return date( 'l', strtotime( $this -> today ) );
+	}
+	/**
+	 * Returns the date.
+	 * Default format: month/day/year. Use $year_first=True for year/month/day.
+	 *
+	 * @param boolean $year_first
+	 * @return string
+	 */
+	function today($year_first = False) {
+		if ( $year_first )
+			return date( 'Y/m/d' );
+		return date( "m/d/Y" );
+	}
+	/**
+	 * Returns current time, custom format allowed.
+	 * Default: h:i:sa.
+	 *
+	 * @param boolean $format
+	 * @return string
+	 */
+	function time($format = false) {
+		if ( $format == false )
+			$format = "h:i:sa";
+		return date( $format );
+	}
+	/**
+	 * Returns a string useful for naming files.
+	 *
+	 * @param boolean $reversed
+	 * @param boolean $year_first
+	 * @return mixed
+	 */
+	function file_string($reversed = False, $year_first = False) {
+		if ( $reversed ) {
+			if ( $year_first ) {
+				$fs = $this -> time( 'h:i:s' ) . '_' . $this -> today( $year_first = True );
+			} else {
+				$fs = $this -> time( 'h:i:s' ) . '_' . $this -> today;
+			}
+		} else {
+			if ( $year_first ) {
+				$fs = $this -> today( $year_first ) . '_' . $this -> time( 'h:i:s' );
+			} else {
+				$fs = $this -> today . '_' . $this -> time( 'h:i:s' );
+			}
+		}
+		$fs = $this -> string -> replace( $fs, ':', '' );
+		$fs = $this -> string -> replace( $fs, '/', '' );
+		return $fs;
+	}
 }
+/**
+ * Time class, though you can get the time from the date class, this has other general useful time methods.
+ *
+ * @author Marc
+ *        
+ */
+class phpFastTime {
+	private $ffile;
+	private $farray;
+	public $stamp_path = 'time_stamp/stamps.json';
+	function __construct() {
+		$this -> ffile = new phpFastFile();
+		$this -> farray = new phpFastArray();
+	}
+	/**
+	 * Returns current time in milliseconds
+	 *
+	 * @return number
+	 */
+	function now_ms() {
+		$mt = explode( ' ', microtime() );
+		return ( ( int ) $mt[1] ) * 1000 + ( ( int ) round( $mt[0] * 1000 ) );
+		// return intval( hrtime( true ) / 1000000 );
+	}
+	/**
+	 * Returns current time in seconds.
+	 *
+	 * @return number
+	 */
+	function now_seconds() {
+		$mt = explode( ' ', microtime() );
+		return ( ( int ) $mt[1] ) + ( ( int ) round( $mt[0] ) );
+	}
+	/**
+	 * Stamps the current time, to a json file via $name
+	 *
+	 * @param string $name
+	 */
+	function stamp($name) {
+		$ff = $this -> ffile;
+		$time_ms = $this -> now_ms();
+		$path = $this -> stamp_path;
+		if ( $ff -> exists( $path ) == False ) {
+			$ff -> create( $path );
+			$ff -> write( $path, '[]' );
+		} else {
+		}
+		$json = $ff -> json_read( $path );
+		$detected = False;
+		foreach ( $json as $attr => $val ) {
+			echo $val['name'] . ' - ' . $name . '<br>';
+			if ( $val['name'] == $name ) {
+				$json[$attr]['stamp'] = $time_ms;
+				$detected = True;
+				break;
+			}
+		}
+
+		if ( ! $detected ) {
+			$stamp_array = array (
+					'name' => $name,
+					'stamp' => $time_ms
+			);
+			$this -> farray -> push( $json, $stamp_array );
+		}
+
+		$ff -> json_write( $path, $json );
+	}
+	/**
+	 * Gets the current time in ms, then gets the time from the stamp json file via $name<br>
+	 * calculates the difference in time, and returns that difference
+	 *
+	 * @param string $name
+	 * @return boolean|number
+	 */
+	function stamp_time_elapsed($name) {
+		$stamp = $this -> stamp_get( $name );
+		if ( $stamp == false ) {
+			return false;
+		}
+		echo $this -> now_ms() . ' - ' . $stamp;
+		$elapsed = ( int ) $this -> now_ms() - ( int ) $stamp;
+		return $elapsed;
+	}
+	/**
+	 * Gets a stamp's time value from the json file
+	 *
+	 * @param string $name
+	 * @return boolean
+	 */
+	function stamp_get($name) {
+		$ff = $this -> ffile;
+		$path = $this -> stamp_path;
+		if ( $ff -> exists( $path ) ) {
+			$json = $ff -> json_read( $path );
+
+			foreach ( $json as $attr => $val ) {
+				if ( $val['name'] == $name ) {
+					return $json[$attr]['stamp'];
+				}
+			}
+		}
+		return false;
+	}
+	/**
+	 * Clears the stamp file totally, or if a name is specified, clears the stamp by name.
+	 *
+	 * @param string $name_or_all
+	 * @return boolean
+	 */
+	function stamp_clear($name_or_all = "all") {
+		$ff = $this -> ffile;
+		$arr = $this -> farray;
+		$path = $this -> stamp_path;
+		if ( $name_or_all == "all" ) {
+			$ff -> write( $path, '[]' );
+			return true;
+		} else {
+			$json = $ff -> json_read( $path );
+			$index = - 1;
+			$detected = False;
+			foreach ( $json as $attr => $val ) {
+				$index ++;
+				if ( $val['name'] == $name_or_all ) {
+					echo 'popping at index ' . $index;
+					$arr -> pop( $json, $index );
+					$detected = True;
+					break;
+				}
+			}
+			if ( $detected ) {
+				$ff -> json_write( $path, $json );
+				return true;
+			}
+		}
+		return false;
+	}
+}
+/**
+ * Main class, has general methods and helper methods users will generally be using instead of default library.
+ *
+ * @author Marc
+ *        
+ */
 class phpFast {
-    public $file;
-    public $string;
-    public $array;
-    public $date;
-    public $logging_enabled = false;
-    public $session_started = false;
-    function __construct() {
-        $this->file = new phpFastFile();
-        $this->string = new phpFastString();
-        $this->array = new phpFastArray();
-        $this->date = new phpFastDate();
-    }
-    function log($str) {
-        if ($this->$logging_enabled) {
-            echo $str;
-        }
-    }
-    function request_query($full_query = true) {
-        if ($full_query) {
-            $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-            return $url;
-        }
-    }
-    function request_type() {
-        return $_SERVER['REQUEST_METHOD'];
-    }
-    function has($key, $type = - 1) {
-        // add support for put requests
-        if ($type == - 1) {
-            $type = strtolower($this->request_type());
-        }
-        if ($type == "post") {
-            return isset($_POST[$key]);
-        } else if ($type == "get") {
-            return isset($_GET[$key]);
-        }
-    }
-    function get($key, $type = - 1) {
-        // add support for put requests
-        if ($type == - 1) {
-            $type = strtolower($this->request_type());
-        }
-        if ($type == 'get') {
-            return $_GET[$key];
-        } else if ($type == 'post') {
-            return $_POST[$key];
-        }
-    }
-    function cookie_has($cookie_name) {
-        return isset($_COOKIE[$cookie_name]);
-    }
-    function cookie_get($cookie_name) {
-        if ($this->cookie_has($cookie_name)) {
-            return $_COOKIE[$cookie_name];
-        }
-        return false;
-    }
-    function cookie_set($cookie_name, $expiration = 30) {
-        $expiration = time() + (86400 * $expiration);
-        setcookie($cookie_name, 'True', $expiration, "/");
-    }
-    function generateRandomString($length = 10) {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0;$i < $length;$i++) {
-            $randomString.= $characters[rand(0, $charactersLength - 1) ];
-        }
-        return $randomString;
-    }
-    function session_start() {
-        session_start();
-        $_SESSION['started'] = true;
-    }
-    function session_set($key, $val) {
-        if ($_SESSION['started']) {
-            $_SESSION[$key] = $val;
-        } else {
-            // session not started..
-            
-        }
-    }
-    function session_get($key) {
-        if ($_SESSION['started']) {
-            if (isset($_SESSION[$key]) == false) {
-                // no key found
-                return false;
-            }
-            return $_SESSION[$key];
-        }
-    }
-    function session_clear($key) {
-        return session_unset($key);
-    }
-    function session_end() {
-        return session_unset();
-    }
+	public $file;
+	public $string;
+	public $array;
+	public $date;
+	public $time;
+	public $logging_enabled = false;
+	public $session_started = false;
+	function __construct() {
+		$this -> file = new phpFastFile();
+		$this -> string = new phpFastString();
+		$this -> array = new phpFastArray();
+		$this -> date = new phpFastDate();
+		$this -> time = new phpFastTime();
+	}
+	/**
+	 * Echos a string.
+	 *
+	 * @param string $str
+	 */
+	function log($str) {
+		if ( $this -> logging_enabled ) {
+			echo $str;
+		}
+	}
+	/**
+	 * Turns on detailed error output for debugging purposes.
+	 */
+	function show_errors() {
+		ini_set( 'display_errors', 1 );
+		ini_set( 'display_startup_errors', 1 );
+		error_reporting( E_ALL );
+	}
+	/**
+	 * Gets an array of all the files attempted to be uploaded, if any.
+	 *
+	 * @return boolean|array
+	 */
+	function uploaded_files() {
+		$arr = array ();
+		foreach ( $_FILES as $name => $file ) {
+			$this -> array -> push( $arr, array (
+					$name,
+					$file
+			) );
+		}
+		if ( $this -> array -> len( $arr ) == 0 )
+			return false;
+		else
+			return $arr;
+	}
+	/**
+	 * returns query string ie: <br>
+	 * http://example.com/example.php?example=true&example2=true
+	 *
+	 * @param boolean $full_query=true
+	 * @return string
+	 */
+	function request_query($full_query = true) {
+		if ( $full_query ) {
+			$url = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http' ) . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			return $url;
+		} else {
+			$url = $url = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http' ) . '://' . $_SERVER['REQUEST_URI'];
+		}
+	}
+	/**
+	 * Gets the current request type from the user.
+	 *
+	 * @return string
+	 */
+	function request_type() {
+		return $_SERVER['REQUEST_METHOD'];
+	}
+	/**
+	 * Checks post/get/put to see if a value has been set.
+	 *
+	 * @param string $key
+	 * @param string $type
+	 * @return string
+	 */
+	function has($key, $type = - 1) {
+		// add support for put requests
+		if ( $type == - 1 ) {
+			$type = strtolower( $this -> request_type() );
+		}
+		if ( $type == "post" ) {
+			return isset( $_POST[$key] );
+		} else if ( $type == "get" ) {
+			return isset( $_GET[$key] );
+		}
+	}
+	/**
+	 * Returns a value from post/get/put.
+	 *
+	 * @param string $key
+	 * @param string $type
+	 * @return string
+	 */
+	function get($key, $type = - 1) {
+		// add support for put requests
+		if ( $type == - 1 ) {
+			$type = strtolower( $this -> request_type() );
+		}
+		if ( $type == 'get' ) {
+			return $_GET[$key];
+		} else if ( $type == 'post' ) {
+			return $_POST[$key];
+		}
+	}
+	/**
+	 * Checks if a cookie exists.
+	 *
+	 * @param string $cookie_name
+	 * @return boolean
+	 */
+	function cookie_has($cookie_name) {
+		return isset( $_COOKIE[$cookie_name] );
+	}
+	/**
+	 * Get the value of the cookie.
+	 *
+	 * @param string $cookie_name
+	 * @return boolean
+	 */
+	function cookie_get($cookie_name) {
+		if ( $this -> cookie_has( $cookie_name ) ) {
+			return $_COOKIE[$cookie_name];
+		}
+		return false;
+	}
+	/**
+	 * Set the value of a cookie.
+	 *
+	 * @param string $cookie_name
+	 * @param number $expiration
+	 */
+	function cookie_set($cookie_name, $expiration = 30) {
+		$expiration = time() + ( 86400 * $expiration );
+		setcookie( $cookie_name, 'True', $expiration, "/" );
+	}
+	/**
+	 * Generate a random string with default length of 10 characters.
+	 *
+	 * @param number $length
+	 * @return string
+	 */
+	function generateRandomString($length = 10) {
+		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		$charactersLength = strlen( $characters );
+		$randomString = '';
+		for( $i = 0; $i < $length; $i ++ ) {
+			$randomString .= $characters[rand( 0, $charactersLength - 1 )];
+		}
+		return $randomString;
+	}
+	/**
+	 * Start a user session.
+	 */
+	function session_start() {
+		session_start();
+		$_SESSION['started'] = true;
+	}
+	/**
+	 * Set a variable for a user session.
+	 *
+	 * @param string $key
+	 * @param string $val
+	 */
+	function session_set($key, $val) {
+		if ( $_SESSION['started'] ) {
+			$_SESSION[$key] = $val;
+		} else {
+			// session not started..
+		}
+	}
+	/**
+	 * Get the value for a user session key.
+	 *
+	 * @param string $key
+	 * @return boolean
+	 */
+	function session_get($key) {
+		if ( $_SESSION['started'] ) {
+			if ( isset( $_SESSION[$key] ) == false ) {
+				// no key found
+				return false;
+			}
+			return $_SESSION[$key];
+		}
+	}
+	/**
+	 * Clear the key for a session.
+	 *
+	 * @param string $key
+	 * @return boolean
+	 */
+	function session_clear($key) {
+		return session_unset( $key );
+	}
+	/**
+	 * End the session for a user.
+	 *
+	 * @return boolean
+	 */
+	function session_end() {
+		return session_unset();
+	}
 }
 ?>
