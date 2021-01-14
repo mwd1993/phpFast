@@ -146,6 +146,28 @@ echo $date -> file_string();
 
 ```
 
+### Time
+
+```php
+$time = $pf -> time;
+
+echo $time -> now_ms();
+// -- > 424283832323
+
+echo $time -> now_seconds();
+// -- > 424490248
+
+// Save current time - millesconds to the stamp json file by name
+$time -> stamp('some_stamp');
+
+// Retrieve stamp value (time in milliseconds)
+$time -> stamp_get('some_stamp');
+
+// Get the time elapsed from the current time (in milliseconds) and the time of the stamp
+echo $time -> stamp_time_elapsed('some_stamp');
+// outputs ie: 2000 (current time) - 1000 (stamp time) = 1000 (time elapsed)
+```
+
 ### Arrays
 
 ```php
