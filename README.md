@@ -157,7 +157,7 @@ echo $time -> now_ms();
 echo $time -> now_seconds();
 // -- > 424490248
 
-// Save current time - millesconds to the stamp json file by name
+// Save current time in millesconds to the stamp json file by name
 $time -> stamp('some_stamp');
 
 // Retrieve stamp value (time in milliseconds)
