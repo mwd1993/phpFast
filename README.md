@@ -108,7 +108,7 @@ $user -> register('Username','password');
 $user -> edit('Username', 'Some Key Value', 'Some Value', $force_edit=true);
 
 // editing the value
-$user -> edit('Username','Some Value', 'Updated Value');
+$user -> edit('Username','Some Key Value', 'Updated Value');
 ```
 
 ### Strings
