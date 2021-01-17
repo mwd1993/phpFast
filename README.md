@@ -88,6 +88,29 @@ if($file -> exists($path)) {
 }
 ```
 
+### Users
+
+```php
+$pf = new phpFast();
+$user = $pf -> user;
+$user -> get_active_path();
+// --> ../Users/
+
+$user -> set_active_path('Data/','Users/');
+// --> ../Data/Users/
+
+$user -> exists('Username');
+// --> False
+
+$user -> register('Username','password');
+
+// to initially set the value, force edit is set to true
+$user -> edit('Username', 'Some Value', 3, $force_edit=true);
+
+// editing the value
+$user -> edit('Username','Some Value', 10);
+```
+
 ### Strings
 
 ```php

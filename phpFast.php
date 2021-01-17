@@ -270,6 +270,58 @@ class phpFastString {
 		return strpos( $str, $sub_str );
 	}
 	/**
+	 * Lowercase a string.
+	 * Can provide additional arguments to customize the first letter and the rest of the letters.
+	 *
+	 * @param string $str
+	 * @param boolean $just_first
+	 * @param boolean $just_rest
+	 * @return string
+	 */
+	function lower($str, $just_first = false, $just_rest = false) {
+		if ( $just_first == false && $just_rest == false ) {
+			return strtolower( $str );
+		} else {
+			if ( $just_first == true ) {
+				echo 'in';
+				$str = $this -> slice( strtolower( $str ), 0, 1 ) . $this -> slice( $str, 1 );
+				// return $this -> slice(strtolower($str), 0, 1) . $this ->slice($str,1);
+			}
+
+			if ( $just_rest == true ) {
+				echo ' in rest';
+				$str = $this -> slice( $str, 0, 1 ) . $this -> slice( strtolower( $str ), 1 );
+				// return $this->slice($str, 0, 1) . $this -> slice(strtolower($str, $start));
+			}
+		}
+		return $str;
+	}
+	/**
+	 * Uppercase a string.
+	 * Can provide additional arguments to customize the first letter and the rest of the letters.
+	 *
+	 * @param string $str
+	 * @param boolean $just_first
+	 * @param boolean $just_rest
+	 * @return string
+	 */
+	function upper($str, $just_first = false, $just_rest = false) {
+		if ( $just_first == false && $just_rest == false ) {
+			return strtoupper( $str );
+		} else {
+			if ( $just_first ) {
+				$str = $this -> slice( strtoupper( $str ), 0, 1 ) . $this -> slice( $str, 1 );
+				// return $this -> slice(strtolower($str), 0, 1) . $this ->slice($str,1);
+			}
+
+			if ( $just_rest ) {
+				$str = $this -> slice( $str, 0, 1 ) . $this -> slice( strtoupper( $str ), 1 );
+				// return $this->slice($str, 0, 1) . $this -> slice(strtolower($str, $start));
+			}
+		}
+		return $str;
+	}
+	/**
 	 * Check if a string contains a string within it.
 	 *
 	 * @param string $str
@@ -305,6 +357,14 @@ class phpFastString {
  *        
  */
 class phpFastArray {
+	/**
+	 * Returns a new, empty array
+	 *
+	 * @return array
+	 */
+	function new() {
+		return array ();
+	}
 	/**
 	 * Dumps the array out to view, echos var_dump.
 	 *
@@ -436,7 +496,6 @@ class phpFastTime {
 	function now_ms() {
 		$mt = explode( ' ', microtime() );
 		return ( ( int ) $mt[1] ) * 1000 + ( ( int ) round( $mt[0] * 1000 ) );
-		// return intval( hrtime( true ) / 1000000 );
 	}
 	/**
 	 * Returns current time in seconds.
@@ -538,7 +597,6 @@ class phpFastTime {
 			foreach ( $json as $attr => $val ) {
 				$index ++;
 				if ( $val['name'] == $name_or_all ) {
-					echo 'popping at index ' . $index;
 					$arr -> pop( $json, $index );
 					$detected = True;
 					break;
@@ -550,6 +608,160 @@ class phpFastTime {
 			}
 		}
 		return false;
+	}
+}
+/**
+ * User class, allows for simple user/profile data management.
+ *
+ * @author Marc
+ *        
+ */
+class phpFastUser {
+	private $ffile;
+	private $farray;
+	private $path_main = 'Users/';
+	private $path_subdir = '';
+	public $password_hash_cost = 12;
+	function __construct() {
+		$this -> ffile = new phpFastFile();
+		$this -> farray = new phpFastArray();
+	}
+	/**
+	 * Check the password against the hashed value stored in the user directory
+	 *
+	 * @param string $user
+	 * @param string $pass_hash
+	 * @return boolean
+	 */
+	private function check_pass($user, $pass_hash) {
+		if ( $this -> exists( $user ) ) {
+			$json = $this -> ffile -> json_read( $this -> get_active_path() . $user );
+			foreach ( $json as $attr => $val ) {
+				if ( $val['pass_hash'] == $pass_hash ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	function get_active_path() {
+		return $this -> path_main . $this -> path_subdir;
+	}
+	/**
+	 * Sets the active path to use when reading/writing/updating user values.
+	 *
+	 * @param string $path_main
+	 * @param string $path_subdir
+	 */
+	function set_active_path($path_main = 'Users/', $path_subdir = '') {
+		$this -> path_main = $path_main;
+		$this -> path_subdir = $path_subdir;
+	}
+	/**
+	 * Registers/Creates a user to the active directory.
+	 *
+	 * @param string $user
+	 * @param string $pass
+	 * @return boolean
+	 */
+	function register($user, $pass) {
+		$ff = $this -> ffile;
+		$fa = $this -> farray;
+		if ( $this -> exists( $user ) ) {
+			return false;
+		}
+
+		$pass_safe = password_hash( $pass, PASSWORD_DEFAULT, [ 
+				'cost' => $this -> password_hash_cost
+		] );
+
+		$ff -> create( $path );
+		$ff -> write( $this -> get_active_path() . $user, '{}' );
+		$json = $ff -> json_read( $this -> get_active_path() . $user );
+		$hash = array (
+				'pass_hash' => $pass_safe
+		);
+		$fa -> push( $json, $hash );
+		$ff -> json_write( $this -> get_active_path() . $user, $json );
+
+		return true;
+		// append to database
+	}
+	/**
+	 * Will set the user as logged in..
+	 *
+	 * @param string $user
+	 * @param string $pass
+	 * @return boolean
+	 */
+	function login($user, $pass) {
+		if ( $this -> exists( $user ) == false ) {
+			return false;
+		}
+		$pass_hash = password_hash( $pass, PASSWORD_DEFAULT, [ 
+				'cost' => $this -> $this -> password_hash_cost
+		] );
+
+		if ( $this -> check_pass( $user, $pass_hash ) ) {
+			// user log in
+		} else {
+			// user failed pass
+		}
+	}
+	function logout($user) {
+	}
+	function exists($user) {
+		return $this -> ffile -> exists( $this -> get_active_path() . $user, $as_dir = True );
+	}
+	/**
+	 * Will delete the user, and the user directory.
+	 *
+	 * @param string $user
+	 * @return boolean
+	 */
+	function delete($user) {
+		if ( $this -> exists( $user ) ) {
+			$this -> ffile -> delete( $this -> get_active_path() . $user );
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * Attempts to edit a users data, by key value, with the new value provided.
+	 * $force_edit=true will write that value if it doesn't exist
+	 *
+	 * @param string $user
+	 * @param string $key
+	 * @param string|array|int|float $new_value
+	 * @param boolean $force_edit
+	 * @return boolean
+	 */
+	function edit($user, $key, $new_value, $force_edit = False) {
+		if ( $this -> exists( $user ) ) {
+			$detected = false;
+			$json = $this -> ffile -> json_read( $this -> get_active_path() . $user );
+			foreach ( $json as $attr => $val ) {
+				if ( isset( $val[$key] ) ) {
+					$detected = true;
+					break;
+				}
+			}
+		}
+		if ( $detected ) {
+			$json[$attr] = array (
+					$key => $val
+			);
+			return true;
+		} else if ( $force_edit && $json != false ) {
+			$obj = array (
+					$key => $val
+			);
+			$this -> farray -> push( $json, $obj );
+			return true;
+		}
+		return false;
+	}
+	function edit_remove($user, $key) {
 	}
 }
 /**
@@ -619,10 +831,11 @@ class phpFast {
 	function request_query($full_query = true) {
 		if ( $full_query ) {
 			$url = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http' ) . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-			return $url;
 		} else {
 			$url = $url = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http' ) . '://' . $_SERVER['REQUEST_URI'];
 		}
+
+		return $url;
 	}
 	/**
 	 * Gets the current request type from the user.
@@ -766,5 +979,27 @@ class phpFast {
 	function session_end() {
 		return session_unset();
 	}
+	/**
+	 * Attempts to get the ip of the client request
+	 *
+	 * @return boolean|string
+	 */
+	function IP_get() {
+		$ip = false;
+		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
+			$ip = $_SERVER['HTTP_CLIENT_IP'];
+		} else if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		} else {
+			$ip = $_SERVER['REMOTE_ADDR'];
+		}
+		return $ip;
+	}
+	// function IP_is_banned() {
+	// }
+	// function IP_ban() {
+	// }
+	// function IP_unban() {
+	// }
 }
 ?>
