@@ -207,7 +207,7 @@ class phpFastFile {
 	}
 }
 /**
- * File Class that handles everything to do with working with files.
+ * String Class, handles everything to do with working with strings.
  *
  * @author Marc
  *        
@@ -283,15 +283,11 @@ class phpFastString {
 			return strtolower( $str );
 		} else {
 			if ( $just_first == true ) {
-				echo 'in';
 				$str = $this -> slice( strtolower( $str ), 0, 1 ) . $this -> slice( $str, 1 );
-				// return $this -> slice(strtolower($str), 0, 1) . $this ->slice($str,1);
 			}
 
 			if ( $just_rest == true ) {
-				echo ' in rest';
 				$str = $this -> slice( $str, 0, 1 ) . $this -> slice( strtolower( $str ), 1 );
-				// return $this->slice($str, 0, 1) . $this -> slice(strtolower($str, $start));
 			}
 		}
 		return $str;
@@ -397,6 +393,9 @@ class phpFastArray {
 			$extend = 1;
 		$arr = array_splice( $array, $index, $extend );
 		return $array;
+	}
+	function indexOf($array, $array_item) {
+		return array_search( $array_item, $array );
 	}
 }
 /**
@@ -523,7 +522,6 @@ class phpFastTime {
 		$json = $ff -> json_read( $path );
 		$detected = False;
 		foreach ( $json as $attr => $val ) {
-			echo $val['name'] . ' - ' . $name . '<br>';
 			if ( $val['name'] == $name ) {
 				$json[$attr]['stamp'] = $time_ms;
 				$detected = True;
@@ -553,7 +551,6 @@ class phpFastTime {
 		if ( $stamp == false ) {
 			return false;
 		}
-		echo $this -> now_ms() . ' - ' . $stamp;
 		$elapsed = ( int ) $this -> now_ms() - ( int ) $stamp;
 		return $elapsed;
 	}
@@ -633,11 +630,11 @@ class phpFastUser {
 	 * @param string $pass_hash
 	 * @return boolean
 	 */
-	private function check_pass($user, $pass_hash) {
+	private function check_pass($user, $pass) {
 		if ( $this -> exists( $user ) ) {
-			$json = $this -> ffile -> json_read( $this -> get_active_path() . $user );
+			$json = $this -> ffile -> json_read( $this -> get_active_path() . $user . '.json' );
 			foreach ( $json as $attr => $val ) {
-				if ( $val['pass_hash'] == $pass_hash ) {
+				if ( password_verify( $pass, $val['pass_hash'] ) ) {
 					return true;
 				}
 			}
@@ -675,14 +672,14 @@ class phpFastUser {
 				'cost' => $this -> password_hash_cost
 		] );
 
-		$ff -> create( $path );
-		$ff -> write( $this -> get_active_path() . $user, '{}' );
-		$json = $ff -> json_read( $this -> get_active_path() . $user );
+		$ff -> create( $this -> get_active_path() . $user . '.json' );
+		$ff -> write( $this -> get_active_path() . $user . '.json', '{}' );
+		$json = $ff -> json_read( $this -> get_active_path() . $user . '.json' );
 		$hash = array (
 				'pass_hash' => $pass_safe
 		);
 		$fa -> push( $json, $hash );
-		$ff -> json_write( $this -> get_active_path() . $user, $json );
+		$ff -> json_write( $this -> get_active_path() . $user . '.json', $json );
 
 		return true;
 		// append to database
@@ -698,20 +695,21 @@ class phpFastUser {
 		if ( $this -> exists( $user ) == false ) {
 			return false;
 		}
-		$pass_hash = password_hash( $pass, PASSWORD_DEFAULT, [ 
-				'cost' => $this -> $this -> password_hash_cost
-		] );
 
-		if ( $this -> check_pass( $user, $pass_hash ) ) {
+		if ( $this -> check_pass( $user, $pass ) ) {
 			// user log in
+			return true;
 		} else {
 			// user failed pass
+			return false;
 		}
 	}
 	function logout($user) {
 	}
+	function is_logged_in($user) {
+	}
 	function exists($user) {
-		return $this -> ffile -> exists( $this -> get_active_path() . $user, $as_dir = True );
+		return $this -> ffile -> exists( $this -> get_active_path() . $user . '.json', $as_dir = True );
 	}
 	/**
 	 * Will delete the user, and the user directory.
@@ -721,7 +719,7 @@ class phpFastUser {
 	 */
 	function delete($user) {
 		if ( $this -> exists( $user ) ) {
-			$this -> ffile -> delete( $this -> get_active_path() . $user );
+			$this -> ffile -> delete( $this -> get_active_path() . $user . '.json' );
 			return true;
 		}
 		return false;
@@ -739,8 +737,9 @@ class phpFastUser {
 	function edit($user, $key, $new_value, $force_edit = False) {
 		if ( $this -> exists( $user ) ) {
 			$detected = false;
-			$json = $this -> ffile -> json_read( $this -> get_active_path() . $user );
+			$json = $this -> ffile -> json_read( $this -> get_active_path() . $user . '.json' );
 			foreach ( $json as $attr => $val ) {
+
 				if ( isset( $val[$key] ) ) {
 					$detected = true;
 					break;
@@ -749,19 +748,33 @@ class phpFastUser {
 		}
 		if ( $detected ) {
 			$json[$attr] = array (
-					$key => $val
+					$key => $new_value
 			);
+			$this -> ffile -> json_write( $this -> get_active_path() . $user . '.json', $json );
 			return true;
 		} else if ( $force_edit && $json != false ) {
 			$obj = array (
-					$key => $val
+					$key => $new_value
 			);
 			$this -> farray -> push( $json, $obj );
+			$this -> ffile -> json_write( $this -> get_active_path() . $user . '.json', $json );
 			return true;
 		}
 		return false;
 	}
 	function edit_remove($user, $key) {
+		if ( $this -> exists( $user ) ) {
+			$json = $this -> ffile -> json_read( $this -> get_active_path() . $user . '.json' );
+			foreach ( $json as $attr => $val ) {
+
+				if ( isset( $val[$key] ) ) {
+					$this -> farray -> pop( $json, $this -> farray -> indexOf( $json, $val ) );
+					$this -> ffile -> json_write( $this -> get_active_path() . $user . '.json', $json );
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
 /**
@@ -776,6 +789,7 @@ class phpFast {
 	public $array;
 	public $date;
 	public $time;
+	public $user;
 	public $logging_enabled = false;
 	public $session_started = false;
 	function __construct() {
@@ -784,6 +798,7 @@ class phpFast {
 		$this -> array = new phpFastArray();
 		$this -> date = new phpFastDate();
 		$this -> time = new phpFastTime();
+		$this -> user = new phpFastUser();
 	}
 	/**
 	 * Echos a string.
