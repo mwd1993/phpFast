@@ -105,10 +105,10 @@ $user -> exists('Username');
 $user -> register('Username','password');
 
 // to initially set the value, force edit is set to true
-$user -> edit('Username', 'Some Value', 3, $force_edit=true);
+$user -> edit('Username', 'Some Key Value', 'Some Value', $force_edit=true);
 
 // editing the value
-$user -> edit('Username','Some Value', 10);
+$user -> edit('Username','Some Value', 'Updated Value');
 ```
 
 ### Strings
