@@ -13,15 +13,17 @@ A really light-weight php library that allows you to do basic, tedious things, q
 ```php
   // this equates to: if(isset($_GET/POST/PUT['some_value']))
   if($pf -> has('some_value')) {
-    // can output: post, get or put
+    // echo the request type, can output: post, get or put
     echo $pf -> request_type();
-    // set the value to a var
+	
+    // set the value of the get/post/put check, to a var
     $value_of = $pf -> get('some_value');
   }
   
   // get the current request type provided by user
   if($pf -> has('some_value','post')) {
     // request_type() gets the info from the server
+	
     echo $pf -> request_type();
     // user provided value may differ from the servers above
     $value_of = $pf -> get('some_value','post');
@@ -38,6 +40,7 @@ if($pf -> cookie_has('some_cookie')) {
 } else {
   // sets the cookie with default expiration date to 30 days
   $pf -> cookie_set('some_cookie');
+  
   // set a 60 day expiration instead
   $expiration = 60;
   $pf -> cookie_set('some_cookie',$expiration);
@@ -59,6 +62,7 @@ if($file -> exists($path, $as_dir=false)) {
 } else {
   // create the file
   $file -> create($path);
+  
   // write some text to the file
   $file -> write($path,'some text to the file');
 }
@@ -79,10 +83,12 @@ $file = $pf -> file;
 if($file -> exists($path)) {
   // Read the json file and convert it to a php array
   $json = $file -> json_read($path); 
+  
   foreach($json as $attr => $val){
     // echo each attribute of the array and the value associated
     echo $attr . ' -> ' . $val;
   }
+  
   // write the php array back to the file as json
   $file -> json_write($path, $json);
 }
