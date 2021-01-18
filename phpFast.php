@@ -11,7 +11,7 @@ class phpFastFile {
 		$this -> farray = new phpFastArray();
 	}
 	/**
-	 * Converts a directory to an array of files, wildcard acceptable.'
+	 * Converts a directory to an array of files, wildcard acceptable.
 	 *
 	 * @param string $directory
 	 * @param string $wild_card
@@ -22,7 +22,7 @@ class phpFastFile {
 		return iterator_to_array( $dir );
 	}
 	/**
-	 * Attempts to create a file in the specified path.'
+	 * Attempts to create a file in the specified path.
 	 *
 	 * @param string $path
 	 * @return boolean
@@ -71,7 +71,7 @@ class phpFastFile {
 		return false;
 	}
 	/**
-	 * 'Attempts to rename a file specified by path.'
+	 * 'Attempts to rename a file specified by path.
 	 *
 	 * @param string $path
 	 * @param string $rename
@@ -90,7 +90,7 @@ class phpFastFile {
 		return basename( $path );
 	}
 	/**
-	 * 'Attempts to rename a file specified by path.'
+	 * Attempts to get the path name from a full path
 	 *
 	 * @param string $path
 	 * @return mixed
@@ -146,7 +146,7 @@ class phpFastFile {
 		return file_put_contents( $path, $contents );
 	}
 	/**
-	 * Attempts to write a json object to a file, this method handles encoding.'
+	 * Attempts to write a json object to a file, this method handles encoding.
 	 *
 	 * @param string $path
 	 * @param array $json
@@ -326,7 +326,11 @@ class phpFastString {
 	 * @return boolean
 	 */
 	function contains($str, $contains, $case_sensitive = false) {
-		return str_contains( strtolower( $str ), strtolower( $contains ) );
+		if ( $case_sensitive ) {
+			return str_contains( $str, $contains );
+		} else {
+			return str_contains( strtolower( $str ), strtolower( $contains ) );
+		}
 	}
 	/**
 	 * Extracts a string between two strings.
@@ -720,7 +724,26 @@ class phpFastUser {
 	function delete($user) {
 		if ( $this -> exists( $user ) ) {
 			$this -> ffile -> delete( $this -> get_active_path() . $user . '.json' );
+			$this -> ffile -> dir_r( $this -> ffile -> path( $this -> get_active_path() . $user . '.json' ) );
 			return true;
+		}
+		return false;
+	}
+	/**
+	 * Gets the value stored to a user, by the key
+	 *
+	 * @param string $user
+	 * @param string $key_value
+	 * @return array|boolean
+	 */
+	function get_value($user, $key_value) {
+		if ( $this -> exists( $user ) ) {
+			$json = $this -> ffile -> json_read( $this -> get_active_path() . $user . '.json' );
+			foreach ( $json as $attr => $val ) {
+				if ( isset( $val[$key_value] ) ) {
+					return $val;
+				}
+			}
 		}
 		return false;
 	}
@@ -762,6 +785,13 @@ class phpFastUser {
 		}
 		return false;
 	}
+	/**
+	 * Attempts to remove a key value from the users data (json)
+	 *
+	 * @param string $user
+	 * @param string $key
+	 * @return boolean
+	 */
 	function edit_remove($user, $key) {
 		if ( $this -> exists( $user ) ) {
 			$json = $this -> ffile -> json_read( $this -> get_active_path() . $user . '.json' );
