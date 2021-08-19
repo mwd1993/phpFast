@@ -327,9 +327,14 @@ class phpFastString {
 	 */
 	function contains($str, $contains, $case_sensitive = false) {
 		if ( $case_sensitive ) {
-			return str_contains( $str, $contains );
+			//return str_contains( $str, $contains );
+            if(strpos($str, $contains) !== false)
+                return true;
+            return false;
 		} else {
-			return str_contains( strtolower( $str ), strtolower( $contains ) );
+			if(strpos( strtolower( $str ), strtolower( $contains ) ) !== false)
+                return true;
+            return false;
 		}
 	}
 	/**
@@ -807,6 +812,54 @@ class phpFastUser {
 		return false;
 	}
 }
+
+class phpMySQL {
+    function __construct() {
+
+    }
+
+    function connect($ip, $user, $pass)
+    {
+        $link = mysqli_connect($ip, $user, $pass);
+        if (!$link) {
+            echo("link failed");
+            return false;
+        }
+        return $link;
+    }
+    /**
+     * "SELECT * FROM " . $select_from . " WHERE ". $select_where ."='".$value."'"
+     */
+    function row_exists($mysql_link, $select_from, $select_where, $value)
+    {
+        $query = mysqli_query($mysql_link, "SELECT * FROM " . $select_from . " WHERE ". $select_where ."='".$value."'");
+
+        if (!$query)
+        {
+            die('Error: ' . mysqli_error($con));
+        }
+
+        if(mysqli_num_rows($query) > 0){
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    function query($mysql_link, $sql_string)
+    {
+        return $mysql_link -> query($sql_string);
+    }
+
+
+    function close($mysql_link)
+    {
+        mysqli_close($mysql_link);
+    }
+}
+
 /**
  * Main class, has general methods and helper methods users will generally be using instead of default library.
  *
@@ -820,6 +873,7 @@ class phpFast {
 	public $date;
 	public $time;
 	public $user;
+    public $mysql;
 	public $logging_enabled = false;
 	public $session_started = false;
 	function __construct() {
@@ -829,6 +883,7 @@ class phpFast {
 		$this -> date = new phpFastDate();
 		$this -> time = new phpFastTime();
 		$this -> user = new phpFastUser();
+        $this -> mysql = new phpMySQL();
 	}
 	/**
 	 * Echos a string.
