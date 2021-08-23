@@ -17,9 +17,23 @@ class phpFastFile {
 	 * @param string $wild_card
 	 * @return array
 	 */
-	function dir_to_array($directory, $wild_card = '*') {
+	function dir_to_array($directory, $wild_card = '*', $ignore_dots = true) {
 		$dir = new DirectoryIterator( dirname( $directory ) );
-		return iterator_to_array( $dir );
+		$array = array();
+		if($ignore_dots) {
+		    $array_count = 0;
+		    foreach($dir as $f) {
+		        if($f -> isDot()) {
+		           $pf -> farray -> push($f);
+		        }
+		    }
+		}
+		else {
+		    $array = iterator_to_array( $dir );
+		}
+		if(count($array) == 0)
+		    return null;
+		return $array;
 	}
 	/**
 	 * Attempts to create a file in the specified path.
