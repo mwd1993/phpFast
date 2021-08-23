@@ -24,7 +24,7 @@ class phpFastFile {
 		    $array_count = 0;
 		    foreach($dir as $f) {
 		        if($f -> isDot()) {
-		           $pf -> farray -> push($f);
+		           $this -> farray -> push($f);
 		        }
 		    }
 		}
