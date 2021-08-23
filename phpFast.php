@@ -9,6 +9,7 @@ class phpFastFile {
 	function __construct() {
 		// phpFastArray
 		$this -> farray = new phpFastArray();
+		
 	}
 	/**
 	 * Converts a directory to an array of files, wildcard acceptable.
@@ -19,22 +20,22 @@ class phpFastFile {
 	 */
 	function dir_to_array($directory, $wild_card = '*', $ignore_dots = true) {
 		$dir = new DirectoryIterator( dirname( $directory ) );
-		$array = array();
-		if($ignore_dots) {
-		    $array_count = 0;
-		    foreach($dir as $f) {
-		        if($f -> isDot()) {
-		           $this -> farray -> push($f);
-		        }
-		    }
-		}
-		else {
-		    $array = iterator_to_array( $dir );
-		}
-		if(count($array) == 0)
-		    return null;
+		$array = array_diff(scandir($directory), array('.', '..'));
 		return $array;
 	}
+	
+	function get_all_folders($directory = '.') {
+	    $d = dir($directory);
+	    $array = array();
+        while(false !== ($entry = $d -> read())) {
+            if($this -> extension($entry) == '' && ($entry != '.') && ($entry != '..')) {
+                $this -> farray -> push($array, $entry);
+            }
+        }
+        $d->close();
+        return $array;
+	}
+	
 	/**
 	 * Attempts to create a file in the specified path.
 	 *
