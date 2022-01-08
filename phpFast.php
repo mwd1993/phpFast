@@ -1121,6 +1121,18 @@ class phpFast {
 		}
 	}
 	/**
+	 * Does a session exist for user?
+	 *
+	 * @param string $key
+	 * @return boolean
+	 */
+	function session_exists() {
+		if ( isset( $_SESSION['started'] ) ) {
+			return true;
+		}
+        	return false;
+	}
+	/**
 	 * Clear the key for a session.
 	 *
 	 * @param string $key
